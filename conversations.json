@@ -1,0 +1,196 @@
+{
+  "conversations": {},
+  "quotes": {},
+  "917770974354@c.us": [
+    {
+      "timestamp": "2025-09-09T16:03:32.922Z",
+      "message": "bali explorer",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:03:32.923Z",
+      "message": "Hi there!  The Bali Explorer (P001) 🏖️ is a 5D/4N trip full of beaches and culture! Would you like me to check availability for your dates?  Let's get started!  First, I'll need your name 🙋,  start date 📅 (dd/mm/yyyy), end date 📅 (dd/mm/yyyy), and the number of guests 👨‍👩‍👧‍👦.  And any preferences you might have for your trip 🌍?",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:04:25.083Z",
+      "message": "Pratham Rathore\n15/08/2026 to 20/08/2026\n3 no of guest",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:04:25.085Z",
+      "message": "Pratham Rathore, that's great!  \n\nFor your trip from 15/08/2026 to 20/08/2026 with 3 guests, would you like me to check availability for the Bali Explorer (P001)? 🏖️",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:04:35.396Z",
+      "message": "yes",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:04:35.398Z",
+      "message": "Okay, Pratham Rathore, let's get started.  \n\nDo you have any preferences for your stay in Bali? 🌍",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:04:42.683Z",
+      "message": "no",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:04:42.685Z",
+      "message": "Okay, Pratham.  To make sure I get everything right, could you tell me your preferred name to use for the booking? 🙋",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:04:57.464Z",
+      "message": "Pratham rathore",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:04:57.466Z",
+      "message": "Okay, Pratham rathore, great!  So we have everything we need for your Bali Explorer (P001) trip. 🎉\n\nTo get prices and check availability, send 'finalize' 💰.  After seeing the quotes, if you want to book, send 'book my trip' 📋✈️",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:05:22.883Z",
+      "message": "finalize",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:05:22.886Z",
+      "message": "🎉 **BOOKING FINALIZED!**\n\n✅ Your booking request has been successfully submitted!\n📧 Our team will review your details and send you the final pricing within 24 hours.\n📞 Our executive will contact you soon to confirm availability and process payment.\n\nThank you for choosing **WanderWorld Travels**! 🌍✨\n\n*Please keep this chat open for updates.*",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:33:46.425Z",
+      "message": "want to book bali explorer",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:33:46.427Z",
+      "message": "Great!  You want to book the Bali Explorer (P001)? 🎉  To get started, I'll need your name 🙋, start date 📅 (dd/mm/yyyy), end date 📅 (dd/mm/yyyy), and the number of guests 👨‍👩‍👧‍👦.  And any preferences you might have for your trip 🌍?",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:34:12.295Z",
+      "message": "pratham rathore",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:34:12.297Z",
+      "message": "Okay Pratham rathore,  we'll need your start date 📅 (dd/mm/yyyy), end date 📅 (dd/mm/yyyy), and the number of guests 👨‍👩‍👧‍👦.  And any preferences you might have for your trip 🌍?",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:34:47.931Z",
+      "message": "15/08/2026 to 20/08/2026\n3 no of guest",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:34:47.933Z",
+      "message": "Okay Pratham rathore, great!  So you want to book the Bali Explorer (P001) for 3 guests from 15/08/2026 to 20/08/2026.  Any preferences for your stay (e.g., beach, culture, activities)?",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:35:02.496Z",
+      "message": "no",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:35:02.497Z",
+      "message": "Okay Pratham rathore, great! So you want to book the Bali Explorer (P001) for 3 guests from 15/08/2026 to 20/08/2026.  No preferences, understood.\n\nTo get prices and check availability, send 'finalize' 💰. After seeing the quotes, if you want to book, send 'book my trip' 📋✈️",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T16:35:31.230Z",
+      "message": "finalize",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T16:35:31.231Z",
+      "message": "🎉 **BOOKING FINALIZED!**\n\n✅ Your booking request has been successfully submitted!\n📧 Our team will review your details and send you the final pricing within 24 hours.\n📞 Our executive will contact you soon to confirm availability and process payment.\n\nThank you for choosing **WanderWorld Travels**! 🌍✨\n\n*Please keep this chat open for updates.*",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T17:24:32.581Z",
+      "message": "finalize",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T17:24:32.582Z",
+      "message": "🎉 **BOOKING FINALIZED!**\n\n✅ Your booking request has been successfully submitted!\n📧 Our team will review your details and send you the final pricing within 24 hours.\n📞 Our executive will contact you soon to confirm availability and process payment.\n\nThank you for choosing **WanderWorld Travels**! 🌍✨\n\n*Please keep this chat open for updates.*",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-09T17:56:07.151Z",
+      "message": "finalize",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-09T17:56:07.152Z",
+      "message": "🎉 **BOOKING FINALIZED!**\n\n✅ Your booking request has been successfully submitted!\n📧 Our team will review your details and send you the final pricing within 24 hours.\n📞 Our executive will contact you soon to confirm availability and process payment.\n\nThank you for choosing **WanderWorld Travels**! 🌍✨\n\n*Please keep this chat open for updates.*",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-10T14:04:16.185Z",
+      "message": "finalize",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-10T14:04:16.187Z",
+      "message": "❌ **BOOKING ERROR**\n\nSorry, there was an issue processing your booking request.\nPlease try again in a few minutes or contact our support team.\n\n📞 Support: +91-XXXXXXXXXX",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-10T14:05:49.560Z",
+      "message": "finalize",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-10T14:05:49.561Z",
+      "message": "🎉 **BOOKING FINALIZED!**\n\n✅ Your booking request has been successfully submitted!\n📧 Our team will review your details and send you the final pricing within 24 hours.\n📞 Our executive will contact you soon to confirm availability and process payment.\n\nThank you for choosing **WanderWorld Travels**! 🌍✨\n\n*Please keep this chat open for updates.*",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-10T14:09:03.052Z",
+      "message": "15/08/2026 to 20/08/2026",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-10T14:09:03.053Z",
+      "message": "Hi!  We still need your name 🙋 before we can finalize the Bali Explorer (P001) booking for 3 guests from 15/08/2026 to 20/08/2026.  What's your name?",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-10T14:09:16.226Z",
+      "message": "Pratham rathore",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-10T14:09:16.227Z",
+      "message": "Okay Pratham rathore, we have your dates (15/08/2026 to 20/08/2026) and number of guests (3).  Is there anything else you'd like to add regarding your preferences for your Bali Explorer (P001) trip?",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-10T14:09:32.566Z",
+      "message": "no that's all",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-10T14:09:32.567Z",
+      "message": "Okay Pratham rathore, so you want to book the Bali Explorer (P001)  \n\nTo get prices and check availability, send 'finalize' 💰. After seeing the quotes, if you want to book, send 'book my trip' 📋✈️",
+      "isBot": true
+    },
+    {
+      "timestamp": "2025-09-10T14:09:58.864Z",
+      "message": "finalize",
+      "isBot": false
+    },
+    {
+      "timestamp": "2025-09-10T14:09:58.865Z",
+      "message": "🎉 **BOOKING FINALIZED!**\n\n✅ Your booking request has been successfully submitted!\n📧 Our team will review your details and send you the final pricing within 24 hours.\n📞 Our executive will contact you soon to confirm availability and process payment.\n\nThank you for choosing **WanderWorld Travels**! 🌍✨\n\n*Please keep this chat open for updates.*",
+      "isBot": true
+    }
+  ]
+}

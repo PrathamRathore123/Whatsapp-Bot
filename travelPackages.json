@@ -1,0 +1,52 @@
+{
+  "packages": [
+    {
+      "id": "P001",
+      "name": "Bali Explorer",
+      "destination": "Bali, Indonesia",
+      "duration": "5 days / 4 nights",
+      "description": "Experience the magic of Bali with this comprehensive package including beach resorts, cultural tours, and adventure activities.",
+      "highlights": [
+        "4-star beach resort accommodation",
+        "Daily breakfast included",
+        "Guided temple tours",
+        "Rice terrace visit",
+        "Traditional Balinese dance show",
+        "Airport transfers"
+      ],
+      "inclusions": [
+        "Accommodation",
+        "Breakfast",
+        "Airport transfers",
+        "Guided tours",
+        "Entrance fees"
+      ],
+      "day wise itinerary": [
+        {
+          "day": 1,
+          "activities": [
+            "Arrival at Ngurah Rai International Airport",
+            "Transfer to hotel and check-in",
+            "Relax at the beach or explore local markets"
+          ]
+        },
+        {
+          "day": 2,
+          "activities": [
+            "Breakfast at the hotel",
+            "Full-day tour of Ubud: visit the Monkey Forest, Ubud Palace, and local art markets",
+            "Lunch at a traditional Balinese restaurant",
+            "Afternoon visit to Tegallalang Rice Terraces",
+            "Evening free for leisure"
+          ]
+        },
+        {
+          "day": 3,
+          "activities": [
+            "Breakfast at the hotel",
+            "Day trip to Tanah Lot Temple and Taman Ayun Temple"
+       ]
+      }
+  ]
+    }]}
+  
