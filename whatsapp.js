@@ -4,9 +4,9 @@ require('dotenv').config();
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 
-async function sendMessage(to, text) {
+async function sendTextMessage(to, text) {
   try {
-    const url = `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`;
+    const url = `https://graph.facebook.com/v22.0/${PHONE_NUMBER_ID}/messages`;
     const data = {
       messaging_product: 'whatsapp',
       to: to,
@@ -21,12 +21,45 @@ async function sendMessage(to, text) {
     };
 
     const response = await axios.post(url, data, { headers });
-    console.log('Message sent:', response.data);
+    console.log('Text message sent:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error sending message:', error.response ? error.response.data : error.message);
+    console.error('Error sending text message:', error.response ? error.response.data : error.message);
     throw error;
   }
+}
+
+async function sendTemplateMessage(to, templateName, languageCode = 'en_US') {
+  try {
+    const url = `https://graph.facebook.com/v22.0/${PHONE_NUMBER_ID}/messages`;
+    const data = {
+      messaging_product: 'whatsapp',
+      to: to,
+      type: 'template',
+      template: {
+        name: templateName,
+        language: {
+          code: languageCode
+        }
+      }
+    };
+    const headers = {
+      'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+      'Content-Type': 'application/json'
+    };
+
+    const response = await axios.post(url, data, { headers });
+    console.log('Template message sent:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error sending template message:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+
+// Backward compatibility - keep the old function name
+async function sendMessage(to, text) {
+  return await sendTextMessage(to, text);
 }
 
 function handleWebhook(req, res) {

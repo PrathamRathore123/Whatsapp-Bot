@@ -4,7 +4,9 @@
   "description": "Node.js project integrating WhatsApp Cloud API with Express",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "node test-meta-api.js",
+    "test:meta": "node test-meta-api.js"
   },
   "dependencies": {
     "axios": "^1.4.0",

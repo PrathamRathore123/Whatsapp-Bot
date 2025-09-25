@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { sendMessage, handleWebhook } = require('./whatsapp');
+const { sendMessage, sendTextMessage, sendTemplateMessage, handleWebhook } = require('./whatsapp');
 require('dotenv').config();
 
 const app = express();
@@ -31,7 +31,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// Test endpoint to send a message
+// Test endpoint to send a text message
 app.get('/send', async (req, res) => {
   const to = req.query.to;
   const text = req.query.text || 'Hello from WhatsApp Cloud API!';
@@ -45,6 +45,53 @@ app.get('/send', async (req, res) => {
     res.status(200).json(response);
   } catch (error) {
     res.status(500).send('Failed to send message');
+  }
+});
+
+// Test endpoint to send a template message (matches your curl command)
+app.post('/send-template', async (req, res) => {
+  const { to, template, language } = req.body;
+
+  if (!to || !template) {
+    return res.status(400).json({
+      error: 'Missing required parameters',
+      required: ['to', 'template'],
+      optional: ['language']
+    });
+  }
+
+  try {
+    const response = await sendTemplateMessage(to, template, language || 'en_US');
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Template message error:', error.response ? error.response.data : error.message);
+    res.status(500).json({
+      error: 'Failed to send template message',
+      details: error.response ? error.response.data : error.message
+    });
+  }
+});
+
+// Test endpoint to send hello_world template (exactly like your curl command)
+app.post('/test-hello-world', async (req, res) => {
+  const to = req.body.to || '917770974354'; // Default from your curl command
+
+  if (!to) {
+    return res.status(400).json({ error: 'Missing "to" parameter' });
+  }
+
+  try {
+    const response = await sendTemplateMessage(to, 'hello_world', 'en_US');
+    res.status(200).json({
+      message: 'Template message sent successfully',
+      response: response
+    });
+  } catch (error) {
+    console.error('Hello world template error:', error.response ? error.response.data : error.message);
+    res.status(500).json({
+      error: 'Failed to send hello_world template',
+      details: error.response ? error.response.data : error.message
+    });
   }
 });
 
