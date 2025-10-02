@@ -1,0 +1,130 @@
+# Environment and configuration
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# WhatsApp Web.js
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Google Service Account Key
+dynamic-aurora-470408-g1-33146c680624.json
+
+# Test files
+test_*.js
+*-test.js
+test*.js
+test_concurrent_*.js
+test_booking_*.js
+test_dashboard_*.js
+test_mysql*.js
+test_webhook*.js
+test_env.js
+test_correction.js
+testConversation.js
+testBookingFlow.js
+test-messageHandler.js
+test-meta-api.js
+
+# Development files
+TODO.md
+*_updated.js
+*_fixed.js
+messageHandler_updated.js
+conversationManager_updated.js
+mysqlConnector_fixed.js
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
