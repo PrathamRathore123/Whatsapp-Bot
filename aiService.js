@@ -12,10 +12,12 @@ class AIService {
     this.ollamaService = OllamaService;
     this.packagesData = this.loadPackagesData();
     this.lastResponseSentForUser = {}; // Track last response per user to prevent duplicates
+    this.userBookingState = {}; // Track if user has started booking process
 
     // Clean up duplicate tracking every 5 minutes to prevent memory leaks
     setInterval(() => {
       this.lastResponseSentForUser = {};
+      this.userBookingState = {};
     }, 5 * 60 * 1000);
   }
 
@@ -29,115 +31,206 @@ class AIService {
     }
   }
 
-  async getAIResponse(userMessage, userId, conversationHistory = '') {
+  async getAIResponse(userMessage, userId, conversationHistory = '', hasQuotesBeenSent = false) {
     // Extract current booking data from conversation
     const currentBookingData = this.extractCurrentBookingData(conversationHistory, userMessage);
 
     console.log(`🤖 DEBUG - User ${userId} - Conversation History: "${conversationHistory}"`);
     console.log(`🤖 DEBUG - User ${userId} - Current Message: "${userMessage}"`);
+    console.log(`🤖 DEBUG - User ${userId} - Has Quotes Been Sent: ${hasQuotesBeenSent}`);
 
-    // Only collect: name, start date, number of people
-    const requiredFields = ['customerName', 'startDate', 'numberOfPeople'];
-    const allCollected = requiredFields.every(field => currentBookingData[field] && currentBookingData[field].trim() !== '');
+    // Track if user has started booking process
+    if (!this.userBookingState[userId]) {
+      this.userBookingState[userId] = false;
+    }
 
-    let response = '';
+    // Check if user is ready to proceed with booking
+    if (userMessage.toLowerCase().includes('ready for this package') || userMessage.toLowerCase().includes('ready to book')) {
+      this.userBookingState[userId] = true;
+      return "Great! Let's get your booking details. 👋 Hello! Can I have your full name for the booking?";
+    }
 
-    if (allCollected) {
-      // All info collected - send confirmation and ask for "finalize"
-      // Calculate end date as start date + 5 days
-      let endDate = currentBookingData.endDate;
-      if (currentBookingData.startDate && !endDate) {
-        try {
-          const startDateObj = new Date(currentBookingData.startDate);
-          if (!isNaN(startDateObj.getTime())) {
-            const endDateObj = new Date(startDateObj);
-            endDateObj.setDate(startDateObj.getDate() + 5);
-            endDate = endDateObj.toISOString().split('T')[0];
+    // If user is in booking process, prioritize booking data collection
+    if (this.userBookingState[userId]) {
+      // Only collect: name, start date, number of people
+      const requiredFields = ['customerName', 'startDate', 'numberOfPeople'];
+      const allCollected = requiredFields.every(field => currentBookingData[field] && currentBookingData[field].trim() !== '');
+
+      // Handle "finalize" message - AI prompt for finalization
+      if (userMessage.toLowerCase() === 'finalize') {
+        if (allCollected) {
+          this.userBookingState[userId] = false; // Reset booking state after finalize
+
+          // AI Prompt 3: When user finalizes, tell them about quotes and nearby enjoyment
+          const finalizePrompt = `You are a helpful travel assistant for Unravel Experience. The customer has just finalized their booking for the Bali Explorer package.
+
+Customer has provided:
+- Name: ${currentBookingData.customerName}
+- Start Date: ${currentBookingData.startDate}
+- Number of People: ${currentBookingData.numberOfPeople}
+
+Please provide a response that:
+1. Confirms their booking finalization
+2. Tells them when they will receive quotes (within 24 hours)
+3. Highlights what they will enjoy nearby their trip in Bali
+4. Mentions exciting activities and attractions they can look forward to
+
+Be enthusiastic and informative.`;
+
+          try {
+            const aiResponse = await this.geminiService.generateResponse(finalizePrompt);
+            return aiResponse || "Thank you for finalizing your booking! We will send the prices in the next 24 hours.";
+          } catch (error) {
+            console.error('Error getting AI response for finalization:', error);
+            return "Thank you for finalizing your booking! We will send the prices in the next 24 hours.";
           }
-        } catch (dateError) {
-          console.error('Error calculating end date:', dateError);
-          endDate = currentBookingData.startDate; // fallback
+        } else {
+          return "Please complete all booking details first before finalizing.";
         }
       }
 
-      response = `📋 **BOOKING SUMMARY**\n\n` +
-        `👤 Name: ${currentBookingData.customerName}\n` +
-        `📅 Start Date: ${currentBookingData.startDate}\n` +
-        `📅 End Date: ${endDate}\n` +
-        `👥 Travelers: ${currentBookingData.numberOfPeople}\n\n` +
-        `✅ All details collected!\n\n` +
-        `Please send **"finalize"** to get quotes from our vendors.`;
-    } else {
-      // Sequential collection flow
-      if (!currentBookingData.customerName) {
-        response = "👋 Hello! Can I have your full name for the booking?";
-      } else if (!currentBookingData.startDate) {
-        response = `Hi ${currentBookingData.customerName}! When would you like your trip to start? (Please provide date in DD/MM/YYYY format)`;
-      } else if (!currentBookingData.numberOfPeople) {
-        response = `Great! How many people will be traveling?`;
+      if (allCollected) {
+        // All info collected - send confirmation and ask for "finalize"
+        // Calculate end date as start date + 5 days
+        let endDate = currentBookingData.endDate;
+        if (currentBookingData.startDate && !endDate) {
+          try {
+            const startDateObj = new Date(currentBookingData.startDate);
+            if (!isNaN(startDateObj.getTime())) {
+              const endDateObj = new Date(startDateObj);
+              endDateObj.setDate(startDateObj.getDate() + 5);
+              endDate = endDateObj.toISOString().split('T')[0];
+            }
+          } catch (dateError) {
+            console.error('Error calculating end date:', dateError);
+            endDate = currentBookingData.startDate; // fallback
+          }
+        }
+
+        response = `📋 **BOOKING SUMMARY**\n\n` +
+          `👤 Name: ${currentBookingData.customerName}\n` +
+          `📅 Start Date: ${currentBookingData.startDate}\n` +
+          `📅 End Date: ${endDate}\n` +
+          `👥 Travelers: ${currentBookingData.numberOfPeople}\n\n` +
+          `✅ All details collected!\n\n` +
+          `Please send **"finalize"** to get quotes from our vendors.`;
+      } else {
+        // AI Prompt 2: For collecting booking data
+        const bookingPrompt = `You are a helpful travel assistant for Unravel Experience collecting booking information for the Bali Explorer package.
+
+Current booking data collected:
+- Name: ${currentBookingData.customerName || 'Not provided'}
+- Start Date: ${currentBookingData.startDate || 'Not provided'}
+- Number of People: ${currentBookingData.numberOfPeople || 'Not provided'}
+
+Customer message: "${userMessage}"
+
+Conversation history:
+${conversationHistory}
+
+Please respond naturally to collect the missing information. Ask for one piece of information at a time in a friendly manner. If all information is collected, summarize and ask them to send "finalize".`;
+
+        try {
+          const aiResponse = await this.geminiService.generateResponse(bookingPrompt);
+          return aiResponse;
+        } catch (error) {
+          console.error('Error getting AI response for booking collection:', error);
+          // Fallback to sequential collection
+          if (!currentBookingData.customerName) {
+            return "👋 Hello! Can I have your full name for the booking?";
+          } else if (!currentBookingData.startDate) {
+            return `Hi ${currentBookingData.customerName}! When would you like your trip to start? (Please provide date in DD/MM/YYYY format)`;
+          } else if (!currentBookingData.numberOfPeople) {
+            return `Great! How many people will be traveling?`;
+          }
+        }
+      }
+
+      return response;
+    }
+
+    // Check if this is a travel document related question
+    const travelDocQuestion = this.isTravelDocumentQuestion(userMessage.toLowerCase());
+    if (travelDocQuestion) {
+      return this.answerTravelDocumentQuestion(userMessage.toLowerCase(), conversationHistory);
+    }
+
+    // Check if this is a package-related question - AI Prompt 1
+    const packageQuestion = this.isPackageQuestion(userMessage.toLowerCase());
+    if (packageQuestion) {
+      const selectedPackage = this.getSelectedPackageFromHistory(conversationHistory);
+      if (selectedPackage) {
+        // AI Prompt 1: Answer about the package
+        const packagePrompt = `You are a helpful travel assistant for Unravel Experience. A customer is asking about the Bali Explorer package.
+
+Package details:
+- Name: ${selectedPackage.name}
+- Destination: ${selectedPackage.destination}
+- Duration: ${selectedPackage.duration}
+- Highlights: ${selectedPackage.highlights.join(', ')}
+- Inclusions: ${selectedPackage.inclusions.join(', ')}
+- Accommodation: ${selectedPackage.accommodation.name} (${selectedPackage.accommodation.type})
+
+Customer message: "${userMessage}"
+
+Conversation history:
+${conversationHistory}
+
+Please provide a detailed, helpful response about the package based on their specific question. Include relevant details and end by asking if they're ready to proceed with booking by saying "ready for this package".`;
+
+        try {
+          const aiResponse = await this.geminiService.generateResponse(packagePrompt);
+          return aiResponse;
+        } catch (error) {
+          console.error('Error getting AI response for package question:', error);
+          return this.answerPackageQuestion(userMessage.toLowerCase(), selectedPackage);
+        }
       }
     }
 
-    prompt = `
-You are a friendly travel booking assistant.
-Help the customer understand travel packages and collect their booking details.
+    // Check for "book my trip" - AI Prompt 4
+    if (userMessage.toLowerCase().includes('book my trip')) {
+      const bookTripPrompt = `You are a helpful travel assistant for Unravel Experience. The customer wants to book their trip and is asking questions about the Bali Explorer package.
 
-AVAILABLE PACKAGES:
-${packagesContext}
+Customer message: "${userMessage}"
 
-${conversationHistory ? 'CONVERSATION HISTORY:\n' + conversationHistory + '\n' : ''}
+Conversation history:
+${conversationHistory}
 
-CUSTOMER MESSAGE: "${userMessage}"
-
-CURRENT BOOKING STATUS:
-${dataStatus}
-
-Your job:
-- If user ask for correction, re-extract and confirm again.
-- Ask one detail at a time if missing (name, package, dates, number of people, email).
-- Answer naturally in a conversational way.
-
-- Keep your answers concise, using 20 to 25 words if asking questions maximum.
-- If some booking details are missing (name, package, dates, number of people, email), politely ask for them.
-- If all details are collected, confirm the booking.
-- Be friendly, clear, and creative in your explanations.`;
-    try {
-      console.log(`🤖 Sending prompt to Gemini AI for user ${userId}:`, prompt.substring(0, 200) + '...');
-      const aiResponse = await this.geminiService.generateResponse(prompt);
-      console.log(`🤖 Received response from Gemini AI for user ${userId}:`, aiResponse.substring(0, 200) + '...');
-      return aiResponse;
-    } catch (geminiError) {
-      console.error('Gemini AI error:', geminiError.message);
-      console.log('Attempting to use Groq as fallback...');
+Please answer their questions about the package, pricing, or booking process. Be helpful and guide them through the booking if needed. If they haven't started booking yet, you can help them begin the process.`;
 
       try {
-        console.log(`🤖 Sending prompt to Groq for user ${userId}:`, prompt.substring(0, 200) + '...');
-        const groqResponse = await this.groqService.generateResponse(prompt);
-        console.log(`🤖 Received response from Groq for user ${userId}:`, groqResponse.substring(0, 200) + '...');
-        return groqResponse;
-      } catch (groqError) {
-        console.error('Groq fallback also failed:', groqError.message);
-        console.error('Full Groq error:', groqError);
-        console.log('Attempting to use Ollama as final fallback...');
-
-        try {
-          console.log(`🤖 Sending prompt to Ollama AI for user ${userId}:`, prompt.substring(0, 200) + '...');
-          const ollamaResponse = await this.ollamaService.generateResponse(prompt);
-          console.log(`🤖 Received response from Ollama AI for user ${userId}:`, ollamaResponse.substring(0, 200) + '...');
-          return ollamaResponse;
-        } catch (ollamaError) {
-          console.error('Ollama fallback also failed:', ollamaError.message);
-          console.error('Full Ollama error:', ollamaError);
-          // Prevent duplicate responses by returning only once
-          if (this.lastResponseSentForUser[userId]) {
-            console.log(`Duplicate response prevented for user ${userId}`);
-            return '';
-          }
-          this.lastResponseSentForUser[userId] = true;
-          return "I'm sorry, I'm having trouble processing your request right now. Please try again later.";
-        }
+        const aiResponse = await this.geminiService.generateResponse(bookTripPrompt);
+        return aiResponse;
+      } catch (error) {
+        console.error('Error getting AI response for book my trip:', error);
+        return "I'd be happy to help you book your trip! What questions do you have about the Bali Explorer package?";
       }
     }
+
+    // If quotes have been sent, don't collect booking information again
+    if (hasQuotesBeenSent) {
+      // Use AI service to generate a general response
+      const aiPrompt = `You are a helpful travel assistant for Unravel Experience. The customer has already received travel quotes.
+
+Customer message: "${userMessage}"
+
+Conversation history:
+${conversationHistory}
+
+Please provide a helpful response. If they mention booking or quotes, remind them that quotes have been sent and they can use "book my trip" or "book my trip now" to proceed with booking.`;
+
+      try {
+        const aiResponse = await this.geminiService.generateResponse(aiPrompt);
+        return aiResponse || "I'm here to help! Since you've received quotes, you can proceed with booking using the available commands.";
+      } catch (error) {
+        console.error('Error getting AI response:', error);
+        return "I'm here to help with your travel plans! Since quotes have been sent, you can use 'book my trip' to proceed with booking.";
+      }
+    }
+
+    // Default fallback response if none of the above conditions met
+    return "If you have any questions about the package or want to proceed with booking, just let me know!";
   }
 
   // Extract current booking data from conversation history and current message
@@ -203,15 +296,24 @@ Your job:
 
       let nameCandidate = null;
       for (const pattern of namePatterns) {
-        const matches = userMessagesOriginal.match(pattern);
+        const matches = userMessagesTitleCased.match(pattern);
         if (matches) {
-          // Take the first reasonable match
-          const potentialName = titleCase(matches[1] || matches[0]);
-          // Basic validation: at least two words for full name
-          if (potentialName.split(' ').length >= 2) {
-            nameCandidate = potentialName;
-            break;
+          let potentialNames = [];
+          if (pattern.flags && pattern.flags.includes('g')) {
+            potentialNames = matches;
+          } else {
+            potentialNames = [matches[1] || matches[0]];
           }
+          for (const potentialName of potentialNames) {
+            const knownPackages = ['Bali Explorer', 'Paris Explorer', 'London Explorer'];
+            if (knownPackages.includes(potentialName)) continue;
+            // Basic validation: at least two words for full name
+            if (potentialName && potentialName.split(' ').length >= 2) {
+              nameCandidate = potentialName;
+              break;
+            }
+          }
+          if (nameCandidate) break;
         }
       }
 
@@ -496,6 +598,85 @@ Your job:
     }
 
     return status;
+  }
+
+  isPackageQuestion(message) {
+    const questionKeywords = ['accommodation', 'hotel', 'star', 'restaurant', 'cafe', 'nearby', 'places', 'visit', 'what', 'how', 'where', 'is there', 'do i get', 'included'];
+    return questionKeywords.some(keyword => message.includes(keyword));
+  }
+
+  getSelectedPackageFromHistory(conversationHistory) {
+    const history = conversationHistory.toLowerCase();
+    if (history.includes('bali explorer') || history.includes('p001')) {
+      return this.packagesData.packages.find(pkg => pkg.id === 'P001');
+    }
+    return null;
+  }
+
+  answerPackageQuestion(question, packageData) {
+    let response = '';
+
+    if (question.includes('accommodation') || question.includes('hotel') || question.includes('star')) {
+      response = `🏨 **Accommodation Details:**\n\n` +
+        `**${packageData.accommodation.name}**\n` +
+        `Type: ${packageData.accommodation.type}\n` +
+        `Location: ${packageData.accommodation.location}\n` +
+        `Amenities: ${packageData.accommodation.amenities.join(', ')}\n\n` +
+        `This is a comfortable ${packageData.accommodation.type.split(' ')[0]} resort perfect for your stay!\n\n` +
+        `If you're ready to proceed with booking, reply **"ready for this package"**.`;
+    } else if (question.includes('restaurant') || question.includes('cafe') || question.includes('food') || question.includes('eat')) {
+      response = `🍽️ **Nearby Restaurants & Cafes:**\n\n` +
+        `**Restaurants:**\n${packageData.accommodation.nearby_restaurants.map(r => `• ${r}`).join('\n')}\n\n` +
+        `**Cafes:**\n${packageData.accommodation.nearby_cafes.map(c => `• ${c}`).join('\n')}\n\n` +
+        `Enjoy the local flavors and international cuisine right near your accommodation!\n\n` +
+        `If you're ready to proceed with booking, reply **"ready for this package"**.`;
+    } else if (question.includes('places') || question.includes('visit') || question.includes('nearby') || question.includes('attractions')) {
+      response = `🏛️ **Nearby Places to Visit:**\n\n${packageData.accommodation.nearby_attractions.map(a => `• ${a}`).join('\n')}\n\n` +
+        `Explore these amazing spots during your free time!\n\n` +
+        `If you're ready to proceed with booking, reply **"ready for this package"**.`;
+    } else {
+      // General package info
+      response = `📦 **Package Information:**\n\n` +
+        `**${packageData.name}**\n` +
+        `Destination: ${packageData.destination}\n` +
+        `Duration: ${packageData.duration}\n\n` +
+        `Highlights: ${packageData.highlights.join(', ')}\n\n` +
+        `Inclusions: ${packageData.inclusions.join(', ')}\n\n` +
+        `If you have specific questions about accommodation, food, or activities, feel free to ask!\n\n` +
+        `If you're ready to proceed with booking, reply **"ready for this package"**.`;
+    }
+
+    return response;
+  }
+
+  isTravelDocumentQuestion(message) {
+    const keywords = [
+      'passport', 'pass port', 'visa', 'documents', 'id card', 'identification',
+      'travel documents', 'passport required', 'passport needed', 'passport necessary',
+      'do i need', 'do we need', 'need passport', 'bring passport', 'is passport',
+      'passport?', 'passports', 'pass port?'
+    ];
+    return keywords.some(keyword => message.toLowerCase().includes(keyword.toLowerCase()));
+  }
+
+  async answerTravelDocumentQuestion(message, conversationHistory = '') {
+    // Use AI to generate a contextual response for travel document questions
+    const aiPrompt = `You are a helpful travel assistant for Unravel Experience. A customer is asking about travel documents.
+
+Customer message: "${message}"
+
+Conversation history:
+${conversationHistory}
+
+Please provide a helpful, accurate response about travel documents. If they mention a specific destination or package, tailor your answer accordingly. If no specific destination is mentioned, give general advice about international travel requirements.`;
+
+    try {
+      const aiResponse = await this.geminiService.generateResponse(aiPrompt);
+      return aiResponse || "For international travel, you'll typically need a valid passport and possibly a visa. Please check the specific requirements for your destination.";
+    } catch (error) {
+      console.error('Error getting AI response for travel documents:', error);
+      return "For international travel, you'll typically need a valid passport and possibly a visa. Please check the specific requirements for your destination.";
+    }
   }
 }
 

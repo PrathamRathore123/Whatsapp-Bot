@@ -1,4 +1,4 @@
-const aiService = require('./aiService');
+ const aiService = require('./aiService');
 const apiConnector = require('./apiConnector');
 const conversationManager = require('./conversationManager');
 const googleSheetsManager = require('./googleSheetsManager');
@@ -57,6 +57,12 @@ class MessageHandler {
       return;
     }
 
+    // Check if message is package selection
+    if (this.isPackageSelection(msg.body)) {
+      await this.handlePackageSelection(msg, customerData);
+      return;
+    }
+
     // Check if message is "Finalize" command
     if (this.isFinalizeCommand(msg.body)) {
       await this.handleFinalizeCommand(msg, customerData);
@@ -75,6 +81,12 @@ class MessageHandler {
       return;
     }
 
+    // Check if message is "Ready for this package" command
+    if (this.isReadyForThisPackageCommand(msg.body)) {
+      await this.handleReadyForThisPackageCommand(msg, customerData);
+      return;
+    }
+
     // Check if message contains booking information
     if (this.containsBookingInfo(msg.body)) {
       // Do not send confirmation message after saving booking info
@@ -83,7 +95,9 @@ class MessageHandler {
 
     // Use AI service to generate response with conversation history
     const conversationHistory = conversationManager.getConversationContext(msg.from);
-    const aiReply = await aiService.getAIResponse(msg.body, msg.from, conversationHistory);
+    // Check if quotes have been sent to this customer
+    const hasQuotesBeenSent = conversationManager.getQuoteData(msg.from) ? true : false;
+    const aiReply = await aiService.getAIResponse(msg.body, msg.from, conversationHistory, hasQuotesBeenSent);
 
     // Save user message and bot reply to conversation history
     conversationManager.addMessage(msg.from, msg.body, false);
@@ -94,27 +108,116 @@ class MessageHandler {
     await sendMessage(phoneNumberForSend, aiReply);
   }
 
+  isPackageSelection(text) {
+    const lowerText = text.toLowerCase();
+    const packageKeywords = ['bali explorer', 'paris explorer', 'london explorer', 'bali', 'paris', 'london', 'p001', 'p002', 'p003'];
+    return packageKeywords.some(pkg => lowerText.includes(pkg));
+  }
+
+  async handlePackageSelection(msg, customerData) {
+    try {
+      conversationManager.addMessage(msg.from, msg.body, false);
+
+      const packageName = msg.body.trim();
+      const packageIdMap = {
+        'bali explorer': 'P001',
+        'paris explorer': 'P002',
+        'london explorer': 'P003',
+        'bali': 'P001',
+        'paris': 'P002',
+        'london': 'P003',
+        'p001': 'P001',
+        'p002': 'P002',
+        'p003': 'P003'
+      };
+      const selectedPackageId = packageIdMap[packageName.toLowerCase()] || null;
+
+      if (!selectedPackageId) {
+        await sendMessage(msg.from, "Sorry, I couldn't recognize that package. Please select a valid package.");
+        return;
+      }
+
+      // Load package details from travelPackages.json
+      const travelPackages = require('./travelPackages.json');
+      const selectedPackage = travelPackages.packages.find(pkg => pkg.id === selectedPackageId);
+
+      if (!selectedPackage) {
+        await sendMessage(msg.from, "Sorry, package details are not available right now.");
+        return;
+      }
+
+      // Send day-wise itinerary to user
+      let itineraryMessage = `📅 Here is the day-wise itinerary for the ${selectedPackage.name}:\n\n`;
+      selectedPackage['day wise itinerary'].forEach(dayInfo => {
+        itineraryMessage += `Day ${dayInfo.day}:\n`;
+        dayInfo.activities.forEach(activity => {
+          itineraryMessage += `- ${activity}\n`;
+        });
+        itineraryMessage += '\n';
+      });
+
+      await sendMessage(msg.from, itineraryMessage);
+
+      // Save itinerary to conversation history
+      conversationManager.addMessage(msg.from, itineraryMessage, true);
+
+      // Inform user they can ask questions and proceed with booking
+      const instructionMessage = "If you have any questions about this package, feel free to ask! If you're ready to proceed, reply 'ready for this package'.";
+      await sendMessage(msg.from, instructionMessage);
+
+      // Save instruction message to conversation history
+      conversationManager.addMessage(msg.from, instructionMessage, true);
+
+    } catch (error) {
+      console.error('Error handling package selection:', error);
+      await sendMessage(msg.from, "Sorry, there was an error processing your package selection. Please try again.");
+    }
+  }
+
   // Method to handle vendor quotes received from backend webhook
   async handleVendorQuotes(quoteData) {
     try {
-      const customerPhone = quoteData.customer_phone;
+      console.log('📨 RECEIVED VENDOR QUOTES:', JSON.stringify(quoteData, null, 2));
+
+      // Validate that customer_phone is present in quoteData
+      if (!quoteData.customer_phone) {
+        console.error('❌ ERROR: Missing customer_phone in quoteData');
+        console.error('QuoteData received:', quoteData);
+        return; // Don't process quotes without customer phone
+      }
+
+      const customerPhone = quoteData.customer_phone.trim();
       const customerChatId = `${customerPhone}@c.us`;
+
+      console.log(`📱 ROUTING QUOTES: Phone ${customerPhone} -> Chat ID ${customerChatId}`);
+
+      // Validate phone number format (should be numeric)
+      if (!/^\d+$/.test(customerPhone)) {
+        console.error(`❌ ERROR: Invalid phone number format: ${customerPhone}`);
+        return;
+      }
 
       // Store quote data in conversation manager for later use
       conversationManager.storeQuoteData(customerChatId, quoteData);
+      console.log(`💾 QUOTES STORED: For customer ${customerChatId}`);
 
       // Format and send quote message to customer
       const quoteMessage = this.formatQuoteMessage(quoteData);
+      console.log(`📤 SENDING QUOTE MESSAGE: To ${customerChatId}`);
 
       await sendMessage(customerChatId, quoteMessage);
+      console.log(`✅ QUOTE MESSAGE SENT: Successfully sent to ${customerChatId}`);
 
       // Save bot message to conversation history
       conversationManager.addMessage(customerChatId, quoteMessage, true);
+      console.log(`💬 CONVERSATION UPDATED: Quote message saved for ${customerChatId}`);
 
     } catch (error) {
-      console.error('Error handling vendor quotes:', error);
+      console.error('❌ ERROR handling vendor quotes:', error);
+      console.error('QuoteData that caused error:', quoteData);
     }
   }
+
 
   // Format quote message for customer
   formatQuoteMessage(quoteData) {
@@ -209,6 +312,11 @@ class MessageHandler {
   isBookMyTripNowCommand(text) {
     const lowerText = text.toLowerCase().trim();
     return lowerText === 'book my trip now';
+  }
+
+  isReadyForThisPackageCommand(text) {
+    const lowerText = text.toLowerCase().trim();
+    return lowerText === 'ready for this package';
   }
 
   async handleFinalizeCommand(msg, customerData) {
@@ -490,12 +598,14 @@ class MessageHandler {
       /(test customer)/i
     ];
 
+    const knownPackages = ['Bali Explorer', 'Paris Explorer', 'London Explorer'];
+
     for (const pattern of namePatterns) {
       const nameMatch = allMessages.match(pattern);
       if (nameMatch) {
         const extractedName = nameMatch[1].trim();
         // Validate that it's likely a name (contains at least one space or is a common name)
-        if (extractedName.length >= 2 && extractedName.length <= 50) {
+        if (extractedName.length >= 2 && extractedName.length <= 50 && !knownPackages.some(pkg => extractedName.includes(pkg))) {
           bookingInfo.customerName = extractedName;
           break;
         }
@@ -665,6 +775,44 @@ class MessageHandler {
     } catch (error) {
       console.error('Error handling book my trip now command:', error);
       const errorMessage = "Sorry, there was an error processing your booking request. Please try again or contact our support team.";
+      await sendMessage(msg.from, errorMessage);
+    }
+  }
+
+  async handleReadyForThisPackageCommand(msg, customerData) {
+    try {
+      const executivePhone = config.EXECUTIVE_PHONE;
+
+      if (!executivePhone) {
+        console.error('❌ Executive phone number not configured');
+        await sendMessage(msg.from, "Sorry, our booking system is temporarily unavailable. Please try again later.");
+        return;
+      }
+
+      // Get conversation history to extract all customer details
+      const conversationHistory = conversationManager.getConversationHistory(msg.from);
+      const customerPhone = msg.from.replace('@c.us', '');
+
+      // Extract comprehensive customer information
+      const customerInfo = this.extractCustomerInfo(conversationHistory, customerPhone, customerData);
+
+      // Format message for executive
+      const executiveMessage = this.formatExecutiveMessage(customerInfo);
+
+      // Send to executive
+      const executiveChatId = `${executivePhone}@c.us`;
+      await sendMessage(executiveChatId, executiveMessage);
+
+      // Confirm to customer
+      const customerConfirmation = "✅ **PACKAGE READY REQUEST SENT!**\n\n" +
+        "Your request to proceed with this package has been forwarded to our executive team.\n" +
+        "They will contact you shortly to finalize your trip details and process payment.\n\n" +
+        "Thank you for choosing Unravel Experience! 🌍✨";
+      await sendMessage(msg.from, customerConfirmation);
+
+    } catch (error) {
+      console.error('Error handling ready for this package command:', error);
+      const errorMessage = "Sorry, there was an error processing your request. Please try again or contact our support team.";
       await sendMessage(msg.from, errorMessage);
     }
   }

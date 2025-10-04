@@ -68,14 +68,14 @@ class APIConnector {
   }
 
   // Send day-wise booking email to vendors based on their working days
-  async sendDaywiseBookingEmail(bookingData, maxRetries = 3) {
+  async sendDaywiseBookingEmail(bookingData, maxRetries = 5) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`📧 Attempting to send day-wise booking email (attempt ${attempt}/${maxRetries})...`);
 
-        // Use longer timeout for day-wise booking emails (20 seconds)
+        // Use longer timeout for day-wise booking emails (30 seconds)
         const response = await axios.post(`${this.baseURL}/api/send-daywise-booking-emails/`, bookingData, {
-          timeout: 20000, // 20 seconds for day-wise processing
+          timeout: 30000, // 30 seconds for day-wise processing
           headers: {
             'Content-Type': 'application/json',
           },
@@ -91,8 +91,8 @@ class APIConnector {
           return null;
         }
 
-        // Wait before retry (exponential backoff)
-        const waitTime = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+        // Wait before retry (exponential backoff with longer max)
+        const waitTime = Math.min(2000 * Math.pow(2, attempt - 1), 15000);
         console.log(`⏳ Waiting ${waitTime}ms before retry...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
       }

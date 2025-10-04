@@ -6,6 +6,29 @@
       "destination": "Bali, Indonesia",
       "duration": "5 days / 4 nights",
       "description": "Experience the magic of Bali with this comprehensive package including beach resorts, cultural tours, and adventure activities.",
+      "accommodation": {
+        "name": "Seminyak Beach Resort",
+        "type": "4-star beach resort",
+        "location": "Seminyak, Bali",
+        "amenities": ["Swimming pool", "Spa", "Restaurant", "Beach access"],
+        "nearby_restaurants": [
+          "Warung Made - Traditional Balinese cuisine, 5-minute walk",
+          "La Lucciola - Italian restaurant, 10-minute walk",
+          "Sarong - Seafood and Asian fusion, 8-minute walk"
+        ],
+        "nearby_cafes": [
+          "Revolver Espresso - Specialty coffee, 3-minute walk",
+          "Sisterfields - Healthy breakfast and coffee, 5-minute walk",
+          "The Coffee Library - Cozy cafe with books, 7-minute walk"
+        ],
+        "nearby_attractions": [
+          "Seminyak Beach - 2-minute walk",
+          "Petitenget Temple - 10-minute walk",
+          "Seminyak Square - Shopping and dining, 5-minute walk",
+          "Kuta Beach - 15-minute drive",
+          "Ubud Art Market - 30-minute drive"
+        ]
+      },
       "highlights": [
         "4-star beach resort accommodation",
         "Daily breakfast included",
@@ -26,8 +49,9 @@
           "day": 1,
           "activities": [
             "Arrival at Ngurah Rai International Airport",
-            "Transfer to hotel and check-in",
-            "Relax at the beach or explore local markets"
+            "Transfer to Seminyak Beach Resort and check-in",
+            "Relax at the beach or explore local markets",
+            "Welcome dinner at hotel restaurant"
           ]
         },
         {
@@ -37,16 +61,39 @@
             "Full-day tour of Ubud: visit the Monkey Forest, Ubud Palace, and local art markets",
             "Lunch at a traditional Balinese restaurant",
             "Afternoon visit to Tegallalang Rice Terraces",
-            "Evening free for leisure"
+            "Evening free for leisure at Seminyak Beach"
           ]
         },
         {
           "day": 3,
           "activities": [
             "Breakfast at the hotel",
-            "Day trip to Tanah Lot Temple and Taman Ayun Temple"
-       ]
-      }
+            "Day trip to Tanah Lot Temple and Taman Ayun Temple",
+            "Visit to local salt farms",
+            "Afternoon free time for shopping or spa",
+            "Traditional Balinese dance show in the evening"
+          ]
+        },
+        {
+          "day": 4,
+          "activities": [
+            "Breakfast at the hotel",
+            "Optional activities: surfing lesson or yoga session",
+            "Visit to local villages and coffee plantations",
+            "Afternoon beach time",
+            "Farewell dinner with cultural performance"
+          ]
+        },
+        {
+          "day": 5,
+          "activities": [
+            "Breakfast at the hotel",
+            "Free morning for last-minute shopping",
+            "Transfer to airport for departure"
+          ]
+        }
+      ]
+    }
   ]
-    }]}
+}
   
